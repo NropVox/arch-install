@@ -3,7 +3,7 @@ read -p "Enter username: " username
 read -s -p "Enter user password: " password
 read -s -p "Enter root password: " rootPassword
 
-reflector --latest 20 --sort rate --counter JP,SG,KR --save /etc/pacman.d/mirrorlist
+reflector --latest 20 --sort rate -c JP,SG,KR --save /etc/pacman.d/mirrorlist
 
 device=/dev/${disk}
 wipefs --all ${device}
