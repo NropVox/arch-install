@@ -7,11 +7,6 @@ echo "LANG=en_US.UTF-8" > /etc/locale.conf
 ln -sf /usr/share/zoneinfo/Asia/Manila /etc/localtime
 hwclock --systohc
 
-## Setup grub
-mkdir boot/efi
-grub-install --target=x86_64-efi --bootloader-id=Archer --efi-directory=/boot/efi
-grub-mkconfig -o /boot/grub/grub.cfg
-
 ## Setup hostname
 echo "archer" > /etc/hostname
 
@@ -47,3 +42,6 @@ ln -s /media/aj/backup/Android-OS /home/aj
 ln -s /media/aj/backup/Documents /home/aj
 ln -s /media/aj/backup/Downloads /home/aj
 ln -s /media/aj/backup/Projects /home/aj
+
+## Remove itself
+rm /opt/post-install.sh

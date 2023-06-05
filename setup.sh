@@ -36,4 +36,9 @@ echo "${username}:${password}" | chpasswd -R /mnt
 echo "root:${rootPassword}" | chpasswd -R /mnt
 echo "aj ALL=(ALL) ALL" > /mnt/etc/sudoers.d/00_aj
 
-arch-chroot /mnt sh /opt/post-install.sh
+## Setup grub
+arch-chroot /mnt mkdir boot/efi
+arch-chroot /mnt grub-install --target=x86_64-efi --bootloader-id=Archer --efi-directory=/boot/efi
+arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg
+
+echo Install Complete make sure to run the /opt/post-install.sh on first boot
