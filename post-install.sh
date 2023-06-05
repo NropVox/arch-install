@@ -36,6 +36,7 @@ echo "
 # /dev/sdb1
 UUID=$uuid /media/aj ext4 defaults 0 2
 " >> /etc/fstab
+systemctl daemon-reload
 mount -a
 
 ln -s /media/aj/backup/Android-OS /home/aj
