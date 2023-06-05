@@ -15,12 +15,6 @@ grub-mkconfig -o /boot/grub/grub.cfg
 ## Setup hostname
 echo "archer" > /etc/hostname
 
-## Setup users and password
-useradd -m ${username}
-echo "${username}:${password}" | chpasswd
-echo "root:${rootPassword}" | chpasswd
-echo "aj ALL=(ALL) ALL" > /etc/sudoers.d/00_aj
-
 ## Setup pacman config
 pacman_conf=/etc/pacman.conf
 sed 's/#ParallelDownloads/ParallelDownloads/' $pacman_conf > $pacman_conf.tmp
