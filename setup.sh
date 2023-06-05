@@ -24,7 +24,7 @@ mount ${part_root} /mnt
 
 pacstrap /mnt base linux linux-firmware git nano sudo grub efibootmgr
 
-mount ${part_boot} /mnt/boot
+mount ${part_boot} /mnt/boot/efi --mkdir
 
 genfstab -L /mnt >> /mnt/etc/fstab
 
@@ -37,7 +37,6 @@ echo "root:${rootPassword}" | chpasswd -R /mnt
 echo "aj ALL=(ALL) ALL" > /mnt/etc/sudoers.d/00_aj
 
 ## Setup grub
-arch-chroot /mnt mkdir boot/efi
 arch-chroot /mnt grub-install --target=x86_64-efi --bootloader-id=Archer --efi-directory=/boot/efi
 arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg
 
