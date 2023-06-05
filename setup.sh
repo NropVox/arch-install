@@ -22,7 +22,7 @@ mkdir -p /mnt/boot
 mount ${part_root} /mnt
 
 ## Install Arch
-pacstrap /mnt base linux linux-firmware git nano sudo grub efibootmgr
+pacstrap /mnt base linux linux-firmware git nano sudo grub efibootmgr networkmanager
 
 ## Setup fstab
 mount ${part_boot} /mnt/boot/efi --mkdir
