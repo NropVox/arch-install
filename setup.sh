@@ -1,7 +1,7 @@
 read -p "Enter disk name: " disk
 read -p "Enter username: " username
 read -s -p "Enter user password: " password
-read -s -p "Enter root password: " rootPassword
+read -s -p "\nEnter root password: " rootPassword
 
 reflector --latest 20 --sort rate -c JP,SG,KR --save /etc/pacman.d/mirrorlist
 
