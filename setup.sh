@@ -5,29 +5,30 @@ echo
 read -s -p "Enter root password: " rootPassword
 echo
 
+## Run reflector
+echo Running reflector
 reflector --latest 20 --sort rate -c JP,SG,KR --save /etc/pacman.d/mirrorlist
 
+## Setup disk
 device=/dev/${disk}
 wipefs --all ${device}
 sgdisk --clear "${device}" --new 1::-551MiB "${device}" --new 2::0 --typecode 2:ef00 "${device}"
 sgdisk --change-name=1:primary --change-name=2:ESP "${device}"
-
 part_root=${device}1
 part_boot=${device}2
-
 mkfs.vfat -n "EFI" -F 32 "${part_boot}"
 mkfs.ext4 "${part_root}"
-
 mkdir -p /mnt/boot
-
 mount ${part_root} /mnt
 
+## Install Arch
 pacstrap /mnt base linux linux-firmware git nano sudo grub efibootmgr
 
+## Setup fstab
 mount ${part_boot} /mnt/boot/efi --mkdir
-
 genfstab -L /mnt >> /mnt/etc/fstab
 
+## Copy post install to new root
 cp post-install.sh /mnt/opt
 
 ## Setup users and password
