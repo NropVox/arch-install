@@ -30,13 +30,13 @@ rm -rf ${yaypkg}
 
 ## Final Touches
 uuid=$(blkid | grep /dev/sdb1 | grep -oP '\sUUID="\K[\w-]+')
-sudo mkdir -p /media/aj
-sudo chown aj:aj /media/aj
-sudo echo "
+mkdir -p /media/aj
+chown aj:aj /media/aj
+echo "
 # /dev/sdb1
 UUID=$uuid /media/aj ext4 defaults 0 2
 " >> /etc/fstab
-sudo mount -a
+mount -a
 
 ln -s /media/aj/backup/Android-OS /home/aj
 ln -s /media/aj/backup/Documents /home/aj
