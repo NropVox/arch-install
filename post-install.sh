@@ -1,12 +1,11 @@
 ## Setup locale
 echo "en_US.UTF-8" >> /etc/locale.gen
 locale-gen
-echo LANG=en_US.UTF-8 > /etc/locale.conf
+echo "LANG=en_US.UTF-8" > /etc/locale.conf
 
 ## Setup time and date
-timedatectl set-ntp true
-timedatectl --systohc --utc
-timedatectl set-timezone Asia/Manila
+ln -sf /usr/share/zoneinfo/Asia/Manila /etc/localtime
+hwclock --systohc
 
 ## Setup grub
 mkdir boot/efi
@@ -27,7 +26,7 @@ pacman_conf=/etc/pacman.conf
 sed 's/#ParallelDownloads/ParallelDownloads/' $pacman_conf > $pacman_conf.tmp
 mv $pacman_conf $pacman_conf.bak
 mv $pacman_conf.tmp $pacman_conf
-sed 's/#Colors/Colors/' $pacman_conf > $pacman_conf.tmp
+sed 's/#Color/Color/' $pacman_conf > $pacman_conf.tmp
 mv $pacman_conf $pacman_conf.bak
 mv $pacman_conf.tmp $pacman_conf
 
@@ -50,6 +49,7 @@ UUID=$uuid /media/aj ext4 defaults 0 2
 " >> /etc/fstab
 sudo mount -a
 
-ln -s /media/aj/backup/android-os /home/aj
-ln -s /media/aj/backup/scripts /home/aj
+ln -s /media/aj/backup/Android-OS /home/aj
+ln -s /media/aj/backup/Documents /home/aj
+ln -s /media/aj/backup/Downloads /home/aj
 ln -s /media/aj/backup/Projects /home/aj
