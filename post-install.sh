@@ -26,7 +26,7 @@ mv $pacman_conf.tmp $pacman_conf
 
 ## Install yay
 yaypkg=/home/aj/.yay-pkg
-sudo -u aj git clone https://aur.archlinux.org/yay-git.git ${yaypkg} && cd ${yaypkg} && makepkg -si
+sudo -u aj git clone https://aur.archlinux.org/yay-git.git ${yaypkg} && cd ${yaypkg} && sudo -u aj makepkg -si
 rm -rf ${yaypkg}
 
 ## Install Packages
