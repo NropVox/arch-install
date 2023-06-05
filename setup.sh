@@ -28,4 +28,10 @@ genfstab -L /mnt >> /mnt/etc/fstab
 
 cp post-install.sh /mnt/opt
 
+## Setup users and password
+useradd -m -R /mnt ${username}
+echo "${username}:${password}" | chpasswd -R /mnt
+echo "root:${rootPassword}" | chpasswd -R /mnt
+echo "aj ALL=(ALL) ALL" > /mnt/etc/sudoers.d/00_aj
+
 arch-chroot /mnt sh /opt/post-install.sh
