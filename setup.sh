@@ -28,3 +28,4 @@ genfstab -L /mnt >> /mnt/etc/fstab
 
 cp post-install.sh /mnt/opt
 
+arch-chroot /mnt sh post-install.sh
