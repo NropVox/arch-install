@@ -1,4 +1,5 @@
 read -p "Enter disk name: " disk
+read -p "Use btrfs? (y/N): " isbtrfs
 read -p "Enter username: " username
 read -s -p "Enter user password: " password
 echo 
@@ -17,9 +18,28 @@ sgdisk --change-name=1:primary --change-name=2:ESP "${device}"
 part_root=${device}1
 part_boot=${device}2
 mkfs.vfat -n "EFI" -F 32 "${part_boot}"
-mkfs.ext4 "${part_root}"
-mkdir -p /mnt/boot
-mount ${part_root} /mnt
+
+if [[ ${isbtrfs} == "y" ]]; then
+    mkfs.btrfs "${part_root}"
+    mount ${part_root} /mnt
+
+    btrfs subvolume create /mnt/@root
+    btrfs subvolume create /mnt/@var
+    btrfs subvolume create /mnt/@home
+    btrfs subvolume create /mnt/@snapshots
+
+    umount /mnt
+    mount -o noatime,compress=lzo,space_cache,subvol=@root ${part_root} /mnt
+    mkdir /mnt/{boot,var,home,.snapshots}
+    mount -o noatime,compress=lzo,space_cache,subvol=@var ${part_root} /mnt/var
+    mount -o noatime,compress=lzo,space_cache,subvol=@home ${part_root} /mnt/home
+    mount -o noatime,compress=lzo,space_cache,subvol=@snapshots ${part_root} /mnt/.snapshots
+
+else
+    mkfs.ext4 "${part_root}"
+    mount ${part_root} /mnt
+fi
+
 
 ## Install Arch
 pacstrap /mnt base linux linux-firmware git nano sudo grub efibootmgr networkmanager
