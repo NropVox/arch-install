@@ -1,3 +1,6 @@
+## Get Info
+read -p "Set this up as a server (y/N): " isserver
+
 ## Setup NetworkManager
 systemctl enable NetworkManager
 systemctl start NetworkManager
@@ -28,25 +31,29 @@ yaypkg=/home/aj/.yay-pkg
 sudo -u aj git clone https://aur.archlinux.org/yay-git.git ${yaypkg} && cd ${yaypkg} && sudo -u aj makepkg -si
 rm -rf ${yaypkg}
 
+packages=""
 ## Install Packages
-# yay -S hyprland
+if [[ ${isserver} = "" || ${isserver} = "N" || ${isserver} = "n"  ]]; then
+packages="${packages} go nodejs npm pagekite"
+else
+packages="${packages} hyprland-git"
+fi
 
 
 ## Final Touches
-uuid=$(blkid | grep /dev/sdb1 | grep -oP '\sUUID="\K[\w-]+')
-mkdir -p /media/aj
-chown aj:aj /media/aj
-echo "
-# /dev/sdb1
-UUID=$uuid /media/aj ext4 defaults 0 2
-" >> /etc/fstab
-systemctl daemon-reload
-mount -a
+if [[ -b /dev/sdb1 ]]; then
+    mkdir -p /media/aj
+    chown aj:aj /media/aj
+    echo "
+    # /dev/sdb1
+    /dev/sdb1 /media/aj ext4 defaults 0 2
+    " >> /etc/fstab
+    systemctl daemon-reload
+    mount -a
 
-ln -s /media/aj/backup/Android-OS /home/aj
-ln -s /media/aj/backup/Documents /home/aj
-ln -s /media/aj/backup/Downloads /home/aj
-ln -s /media/aj/backup/Projects /home/aj
+    sudo -u aj ln -s /media/aj/backup/{Android-OS,Documents,Dwnloads,Projects} /home/aj
+fi
 
 ## Remove itself
 rm /opt/post-install.sh
+reboot
