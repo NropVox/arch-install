@@ -20,6 +20,7 @@ sgdisk --change-name=1:primary --change-name=2:ESP "${device}"
 part_root=${device}1
 part_boot=${device}2
 mkfs.vfat -n "EFI" -F 32 "${part_boot}"
+mount ${part_boot} /mnt/boot/efi --mkdir
 
 if [[ ${isbtrfs} == "y" ]]; then
     echo -n ${password} | cryptsetup luksFormat --label ARCH_LUKS ${part_root}
@@ -52,7 +53,6 @@ fi
 pacstrap /mnt base linux linux-firmware git nano sudo grub efibootmgr networkmanager
 
 ## Setup fstab
-mount ${part_boot} /mnt/boot/efi --mkdir
 genfstab -L /mnt >> /mnt/etc/fstab
 
 ## Copy post install to new root
@@ -65,7 +65,12 @@ echo -n "root:${rootPassword}" | chpasswd -R /mnt
 echo "aj ALL=(ALL) ALL" > /mnt/etc/sudoers.d/00_aj
 
 ## Setup grub
+echo "GRUB_ENABLE_CRYPTODISK=y" >> /mnt/etc/default/grub
+arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg "$@"
 arch-chroot /mnt grub-install --target=x86_64-efi --bootloader-id=Archer --efi-directory=/boot/efi
 arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg
+
+## Setup NetworkManager
+arch-chroot /mnt systemctl enable NetworkManager
 
 echo Install Complete make sure to run the /opt/post-install.sh on first boot
