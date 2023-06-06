@@ -25,7 +25,7 @@ if [[ ${isbtrfs} == "y" ]]; then
     echo -n ${password} | cryptsetup luksFormat --label ARCH_LUKS ${part_root}
     echo -n ${password} | cryptsetup luksOpen "${part_root}" luks
     mkfs.btrfs -L btrfs /dev/mapper/luks
-    mount ${part_root} /mnt
+    mount /dev/mapper/luks /mnt
 
     btrfs subvolume create /mnt/@
     btrfs subvolume create /mnt/@var
