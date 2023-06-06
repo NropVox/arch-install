@@ -20,6 +20,7 @@ part_boot=${device}2
 mkfs.vfat -n "EFI" -F 32 "${part_boot}"
 
 if [[ ${isbtrfs} == "y" ]]; then
+    echo btrfs
     mkfs.btrfs "${part_root}"
     mount ${part_root} /mnt
 
