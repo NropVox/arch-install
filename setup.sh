@@ -1,4 +1,4 @@
-# set -e
+set -e
 
 read -p "Enter disk name: " disk
 read -p "Use btrfs? (y/N): " isbtrfs
@@ -20,7 +20,6 @@ sgdisk --change-name=1:primary --change-name=2:ESP "${device}"
 part_root=${device}1
 part_boot=${device}2
 mkfs.vfat -n "EFI" -F 32 "${part_boot}"
-mount ${part_boot} /mnt/boot --mkdir
 
 if [[ ${isbtrfs} == "y" ]]; then
     echo -n ${password} | cryptsetup luksFormat --type luks2 --label luks "${part_root}"
@@ -42,10 +41,11 @@ if [[ ${isbtrfs} == "y" ]]; then
     mount -o noatime,nodiratime,compress=zstd,subvol=@var ${luks_part} /mnt/var
     mount -o noatime,nodiratime,compress=zstd,subvol=@home ${luks_part} /mnt/home
     mount -o noatime,nodiratime,compress=zstd,subvol=@snapshots ${luks_part} /mnt/.snapshots
-
+    mount ${part_boot} /mnt/boot --mkdir
 else
     mkfs.ext4 "${part_root}"
     mount ${part_root} /mnt
+    mount ${part_boot} /mnt/boot/efi --mkdir
 fi
 
 
@@ -54,16 +54,6 @@ pacstrap /mnt base linux linux-firmware git nano sudo grub efibootmgr networkman
 
 ## Setup fstab
 genfstab -L /mnt >> /mnt/etc/fstab
-
-
-## Setup initramfs
-cat << EOF > /mnt/etc/mkinitcpio.conf
-MODULES=()
-BINARIES=()
-FILES=()
-HOOKS=(base systemd autodetect modconf kms keyboard keymap sd-encrypt consolefont block filesystems fsck)
-EOF
-arch-chroot /mnt mkinitcpio -p linux
 
 ## Copy post install to new root
 cp post-install.sh /mnt/opt
@@ -75,11 +65,24 @@ echo -n "root:${rootPassword}" | chpasswd -R /mnt
 echo "aj ALL=(ALL) ALL" > /mnt/etc/sudoers.d/00_aj
 
 ## Setup grub
-echo "GRUB_ENABLE_CRYPTODISK=y" >> /mnt/etc/default/grub
-arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg "$@"
-arch-chroot /mnt grub-install --target=x86_64-efi --bootloader-id=Archer --efi-directory=/boot/efi
-arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg
+if [[ ${isbtrfs} == "y" ]]; then
+## Setup initramfs
+cat << EOF > /mnt/etc/mkinitcpio.conf
+MODULES=()
+BINARIES=(btrfsck)
+FILES=()
+HOOKS=(base udev autodetect keyboard keymap modconf block encrypt btrfs filesystems keyboard fsck)
+EOF
+    arch-chroot /mnt mkinitcpio -p linux
+    device_uuid=$(blkid | grep ${part_root} | grep -oP ' UUID="\K[\w\d-]+')
+    echo "GRUB_ENABLE_CRYPTODISK=y" >> /mnt/etc/default/grub
+    perl -pi -e "s/GRUB_TIMEOUT=\K\d+/0/" /mnt/etc/default/grub
+    perl -pi -e "s/GRUB_CMDLINE_LINUX_DEFAULT=\"loglevel=3 quiet\K/cryptdevice=${device_uuid}:luks root=${luks_part}/" /mnt/etc/default/grub
+else
+    arch-chroot /mnt grub-install --target=x86_64-efi --bootloader-id=Archer --efi-directory=/boot/efi
+fi
 
+arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg
 ## Setup NetworkManager
 arch-chroot /mnt systemctl enable NetworkManager
 
