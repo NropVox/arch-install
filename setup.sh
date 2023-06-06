@@ -1,4 +1,4 @@
-set -e
+# set -e
 
 read -p "Enter disk name: " disk
 read -p "Use btrfs? (y/N): " isbtrfs
@@ -20,7 +20,7 @@ sgdisk --change-name=1:primary --change-name=2:ESP "${device}"
 part_root=${device}1
 part_boot=${device}2
 mkfs.vfat -n "EFI" -F 32 "${part_boot}"
-mount ${part_boot} /mnt/boot/efi --mkdir
+mount ${part_boot} /mnt/boot --mkdir
 
 if [[ ${isbtrfs} == "y" ]]; then
     echo -n ${password} | cryptsetup luksFormat --type luks2 --label luks "${part_root}"
@@ -63,7 +63,7 @@ BINARIES=()
 FILES=()
 HOOKS=(base systemd autodetect modconf kms keyboard keymap sd-encrypt consolefont block filesystems fsck)
 EOF
-arch-chroot /mnt mkinitcpio -P
+arch-chroot /mnt mkinitcpio -p linux
 
 ## Copy post install to new root
 cp post-install.sh /mnt/opt
