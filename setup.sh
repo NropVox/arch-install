@@ -22,7 +22,9 @@ part_boot=${device}2
 mkfs.vfat -n "EFI" -F 32 "${part_boot}"
 
 if [[ ${isbtrfs} == "y" ]]; then
-    mkfs.btrfs -L ROOT -f "${part_root}"
+    echo -n ${password} | cryptsetup luksFormat --label ARCH_LUKS ${part_root}
+    echo -n ${password} | cryptsetup luksOpen "${part_root}" luks
+    mkfs.btrfs -L btrfs /dev/mapper/luks
     mount ${part_root} /mnt
 
     btrfs subvolume create /mnt/@
@@ -55,8 +57,8 @@ cp post-install.sh /mnt/opt
 
 ## Setup users and password
 useradd -m -R /mnt ${username}
-echo "${username}:${password}" | chpasswd -R /mnt
-echo "root:${rootPassword}" | chpasswd -R /mnt
+echo -n "${username}:${password}" | chpasswd -R /mnt
+echo -n "root:${rootPassword}" | chpasswd -R /mnt
 echo "aj ALL=(ALL) ALL" > /mnt/etc/sudoers.d/00_aj
 
 ## Setup grub
