@@ -24,8 +24,11 @@ mkfs.vfat -n "EFI" -F 32 "${part_boot}"
 if [[ ${isbtrfs} == "y" ]]; then
     echo -n ${password} | cryptsetup luksFormat --label ARCH_LUKS ${part_root}
     echo -n ${password} | cryptsetup luksOpen "${part_root}" luks
-    mkfs.btrfs -L btrfs /dev/mapper/luks
-    mount /dev/mapper/luks /mnt
+
+    luks_part=/dev/mapper/luks
+
+    mkfs.btrfs -L btrfs ${luks_part}
+    mount ${luks_part} /mnt
 
     btrfs subvolume create /mnt/@
     btrfs subvolume create /mnt/@var
@@ -33,11 +36,11 @@ if [[ ${isbtrfs} == "y" ]]; then
     btrfs subvolume create /mnt/@snapshots
 
     umount /mnt
-    mount -o noatime,nodiratime,compress=zstd,subvol=@ ${part_root} /mnt
+    mount -o noatime,nodiratime,compress=zstd,subvol=@ ${luks_part} /mnt
     mkdir /mnt/{boot,var,home,.snapshots}
-    mount -o noatime,nodiratime,compress=zstd,subvol=@var ${part_root} /mnt/var
-    mount -o noatime,nodiratime,compress=zstd,subvol=@home ${part_root} /mnt/home
-    mount -o noatime,nodiratime,compress=zstd,subvol=@snapshots ${part_root} /mnt/.snapshots
+    mount -o noatime,nodiratime,compress=zstd,subvol=@var ${luks_part} /mnt/var
+    mount -o noatime,nodiratime,compress=zstd,subvol=@home ${luks_part} /mnt/home
+    mount -o noatime,nodiratime,compress=zstd,subvol=@snapshots ${luks_part} /mnt/.snapshots
 
 else
     mkfs.ext4 "${part_root}"
