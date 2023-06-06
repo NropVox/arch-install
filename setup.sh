@@ -15,7 +15,7 @@ reflector --latest 20 --sort rate -c JP,SG,KR --save /etc/pacman.d/mirrorlist
 ## Setup disk
 device=/dev/${disk}
 wipefs --all ${device}
-sgdisk --clear "${device}" --new 1::-551MiB "${device}" --new 2::0 --typecode 2:ef00 "${device}"
+sgdisk -f --clear "${device}" --new 1::-551MiB "${device}" --new 2::0 --typecode 2:ef00 "${device}"
 sgdisk --change-name=1:primary --change-name=2:ESP "${device}"
 part_root=${device}1
 part_boot=${device}2
