@@ -61,9 +61,9 @@ cat << EOF > /mnt/etc/mkinitcpio.conf
 MODULES=()
 BINARIES=()
 FILES=()
-HOOKS=(base consolefont udev autodetect modconf block filesystems keyboard)
+HOOKS=(base systemd autodetect modconf kms keyboard keymap sd-encrypt consolefont block filesystems fsck)
 EOF
-arch-chroot /mnt mkinitcpio -p linux
+arch-chroot /mnt mkinitcpio -P
 
 ## Copy post install to new root
 cp post-install.sh /mnt/opt
