@@ -23,7 +23,7 @@ mkfs.vfat -n "EFI" -F 32 "${part_boot}"
 mount ${part_boot} /mnt/boot/efi --mkdir
 
 if [[ ${isbtrfs} == "y" ]]; then
-    echo -n ${password} | cryptsetup luksFormat --label ARCH_LUKS ${part_root}
+    echo -n ${password} | cryptsetup luksFormat --type luks2 --label luks "${part_root}"
     echo -n ${password} | cryptsetup luksOpen "${part_root}" luks
 
     luks_part=/dev/mapper/luks
@@ -54,6 +54,16 @@ pacstrap /mnt base linux linux-firmware git nano sudo grub efibootmgr networkman
 
 ## Setup fstab
 genfstab -L /mnt >> /mnt/etc/fstab
+
+
+## Setup initramfs
+cat << EOF > /mnt/etc/mkinitcpio.conf
+MODULES=()
+BINARIES=()
+FILES=()
+HOOKS=(base consolefont udev autodetect modconf block encrypt-dh filesystems keyboard)
+EOF
+arch-chroot /mnt mkinitcpio -p linux
 
 ## Copy post install to new root
 cp post-install.sh /mnt/opt
