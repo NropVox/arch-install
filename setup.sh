@@ -1,3 +1,5 @@
+set -e
+
 read -p "Enter disk name: " disk
 read -p "Use btrfs? (y/N): " isbtrfs
 read -p "Enter username: " username
