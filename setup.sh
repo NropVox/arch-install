@@ -22,20 +22,20 @@ part_boot=${device}2
 mkfs.vfat -n "EFI" -F 32 "${part_boot}"
 
 if [[ ${isbtrfs} == "y" ]]; then
-    mkfs.btrfs -f "${part_root}"
+    mkfs.btrfs -L ROOT -f "${part_root}"
     mount ${part_root} /mnt
 
-    btrfs subvolume create /mnt/@root
+    btrfs subvolume create /mnt/@
     btrfs subvolume create /mnt/@var
     btrfs subvolume create /mnt/@home
     btrfs subvolume create /mnt/@snapshots
 
     umount /mnt
-    mount -o noatime,compress=lzo,space_cache,subvol=@root ${part_root} /mnt
+    mount -o noatime,nodiratime,compress=zstd,subvol=@ ${part_root} /mnt
     mkdir /mnt/{boot,var,home,.snapshots}
-    mount -o noatime,compress=lzo,space_cache,subvol=@var ${part_root} /mnt/var
-    mount -o noatime,compress=lzo,space_cache,subvol=@home ${part_root} /mnt/home
-    mount -o noatime,compress=lzo,space_cache,subvol=@snapshots ${part_root} /mnt/.snapshots
+    mount -o noatime,nodiratime,compress=zstd,subvol=@var ${part_root} /mnt/var
+    mount -o noatime,nodiratime,compress=zstd,subvol=@home ${part_root} /mnt/home
+    mount -o noatime,nodiratime,compress=zstd,subvol=@snapshots ${part_root} /mnt/.snapshots
 
 else
     mkfs.ext4 "${part_root}"
