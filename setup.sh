@@ -69,9 +69,9 @@ if [[ ${isbtrfs} == "y" ]]; then
 ## Setup initramfs
 cat << EOF > /mnt/etc/mkinitcpio.conf
 MODULES=()
-BINARIES=(btrfsck)
+BINARIES=()
 FILES=()
-HOOKS=(base udev autodetect keyboard keymap modconf block encrypt btrfs filesystems keyboard fsck)
+HOOKS=(base udev autodetect keyboard keymap modconf block encrypt filesystems keyboard fsck)
 EOF
     arch-chroot /mnt mkinitcpio -p linux
     device_uuid=$(blkid | grep ${part_root} | grep -oP ' UUID="\K[\w\d-]+')
