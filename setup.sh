@@ -50,7 +50,7 @@ fi
 
 
 ## Install Arch
-pacstrap /mnt base linux linux-firmware git nano sudo grub efibootmgr networkmanager
+pacstrap /mnt base linux linux-firmware git nano sudo grub efibootmgr networkmanager intel-ucode
 
 ## Setup fstab
 genfstab -L /mnt >> /mnt/etc/fstab
@@ -73,17 +73,22 @@ BINARIES=()
 FILES=()
 HOOKS=(base udev autodetect keyboard keymap modconf block encrypt filesystems keyboard fsck)
 EOF
+    pacstrap /mnt btrfs-progs
     arch-chroot /mnt mkinitcpio -p linux
     device_uuid=$(blkid | grep ${part_root} | grep -oP ' UUID="\K[\w\d-]+')
     echo "GRUB_ENABLE_CRYPTODISK=y" >> /mnt/etc/default/grub
-    perl -pi -e "s/GRUB_CMDLINE_LINUX_DEFAULT=\"loglevel=3 quiet \K/cryptdevice=${device_uuid}:luks root=${luks_part}/" /mnt/etc/default/grub
+    perl -pi -e "s~GRUB_CMDLINE_LINUX_DEFAULT=\"loglevel=3 quiet\K~ cryptdevice=${device_uuid}:luks root=\\${luks_part}~" /mnt/etc/default/grub
+    arch-chroot /mnt grub-install --target=x86_64-efi --bootloader-id=Archer --efi-directory=/boot
 else
     arch-chroot /mnt grub-install --target=x86_64-efi --bootloader-id=Archer --efi-directory=/boot/efi
 fi
 
 perl -pi -e "s/GRUB_TIMEOUT=\K\d+/0/" /mnt/etc/default/grub
 arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg
+
 ## Setup NetworkManager
 arch-chroot /mnt systemctl enable NetworkManager
 
 echo Install Complete make sure to run the /opt/post-install.sh on first boot
+
+perl -pi -e "s/GRUB_CMDLINE_LINUX_DEFAULT=\"loglevel=3 quiet\K\"/cryptdevice=${device_uuid}:luks root=${luks_part}\"/" /mnt/etc/default/grub
