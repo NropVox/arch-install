@@ -46,11 +46,11 @@ if [[ ${isbtrfs} == "y" ]]; then
     mount -o noatime,nodiratime,compress=zstd,subvol=@var ${part_root_install} /mnt/var
     mount -o noatime,nodiratime,compress=zstd,subvol=@home ${part_root_install} /mnt/home
     mount -o noatime,nodiratime,compress=zstd,subvol=@snapshots ${part_root_install} /mnt/.snapshots
-    mount ${part_boot} /mnt/boot --mkdir
+    # mount ${part_boot} /mnt/boot --mkdir
 else
     mkfs.ext4 "${part_root}"
     mount ${part_root} /mnt
-    mount ${part_boot} /mnt/boot/efi --mkdir
+    # mount ${part_boot} /mnt/boot/efi --mkdir
 fi
 
 
@@ -87,6 +87,7 @@ EOF
     perl -pi -e "s~GRUB_CMDLINE_LINUX_DEFAULT=\"loglevel=3 quiet\K~ cryptdevice=UUID=${device_uuid}:luks root=${part_root_install}~" /mnt/etc/default/grub
 else
     efi_dir="${efi_dir}/efi"
+    mount ${part_boot} /mnt${efi_dir} --mkdir
 fi
 
 arch-chroot /mnt grub-install --target=x86_64-efi --bootloader-id=Archer --efi-directory=${efi_dir}
