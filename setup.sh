@@ -84,7 +84,7 @@ EOF
     arch-chroot /mnt mkinitcpio -p linux
     device_uuid=$(blkid | grep ${part_root} | grep -oP ' UUID="\K[\w\d-]+')
     echo "GRUB_ENABLE_CRYPTODISK=y" >> /mnt/etc/default/grub
-    perl -pi -e "s~GRUB_CMDLINE_LINUX_DEFAULT=\"loglevel=3 quiet\K~ cryptdevice=UUID=${device_uuid}:luks root=${luks_part}~" /mnt/etc/default/grub
+    perl -pi -e "s~GRUB_CMDLINE_LINUX_DEFAULT=\"loglevel=3 quiet\K~ cryptdevice=UUID=${device_uuid}:luks root=${part_root_install}~" /mnt/etc/default/grub
 else
     efi_dir="${efi_dir}/efi"
 fi
