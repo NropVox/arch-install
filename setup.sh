@@ -46,6 +46,8 @@ if [[ ${isbtrfs} == "y" ]]; then
     mount -o noatime,nodiratime,compress=zstd,subvol=@var ${part_root_install} /mnt/var
     mount -o noatime,nodiratime,compress=zstd,subvol=@home ${part_root_install} /mnt/home
     mount -o noatime,nodiratime,compress=zstd,subvol=@snapshots ${part_root_install} /mnt/.snapshots
+
+    pacstrap /mnt btrfs-progs
     # mount ${part_boot} /mnt/boot --mkdir
 else
     mkfs.ext4 "${part_root}"
@@ -79,7 +81,6 @@ BINARIES=()
 FILES=()
 HOOKS=(base udev autodetect keyboard keymap modconf block encrypt filesystems keyboard fsck)
 EOF
-    pacstrap /mnt btrfs-progs
     mount ${part_boot} /mnt${efi_dir}
     arch-chroot /mnt mkinitcpio -p linux
     device_uuid=$(blkid | grep ${part_root} | grep -oP ' UUID="\K[\w\d-]+')
