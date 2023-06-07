@@ -32,7 +32,7 @@ if [[ ${isencrypt} == "y" ]]; then
 fi
 
 if [[ ${isbtrfs} == "y" ]]; then
-    mkfs.btrfs -L btrfs ${part_root_install}
+    mkfs.btrfs -fL btrfs ${part_root_install}
     mount ${part_root_install} /mnt
 
     btrfs subvolume create /mnt/@
