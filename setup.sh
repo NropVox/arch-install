@@ -6,7 +6,6 @@ read -p "Encrypt disk? (y/N): " isencrypt
 read -p "Enter username: " username
 read -s -p "Enter user password: " password
 echo 
-echo 
 read -s -p "Enter root password: " rootPassword
 
 clear
@@ -30,10 +29,7 @@ if [[ ${isencrypt} == "y" ]]; then
     echo -n ${password} | cryptsetup luksFormat --type luks2 --label luks "${part_root}"
     echo -n ${password} | cryptsetup luksOpen "${part_root}" luks
     part_root_install=/dev/mapper/luks
-    mount ${part_boot} /mnt/boot --mkdir
 else
-    mount ${part_boot} /mnt/boot/efi --mkdir
-fi
 
 if [[ ${isbtrfs} == "y" ]]; then
     mkfs.btrfs -L btrfs ${part_root_install}
@@ -46,7 +42,7 @@ if [[ ${isbtrfs} == "y" ]]; then
 
     umount /mnt
     mount -o noatime,nodiratime,compress=zstd,subvol=@ ${part_root_install} /mnt
-    mkdir /mnt/{boot,var,home,.snapshots}
+    mkdir /mnt/{var,home,.snapshots}
     mount -o noatime,nodiratime,compress=zstd,subvol=@var ${part_root_install} /mnt/var
     mount -o noatime,nodiratime,compress=zstd,subvol=@home ${part_root_install} /mnt/home
     mount -o noatime,nodiratime,compress=zstd,subvol=@snapshots ${part_root_install} /mnt/.snapshots
@@ -82,12 +78,14 @@ FILES=()
 HOOKS=(base udev autodetect keyboard keymap modconf block encrypt filesystems keyboard fsck)
 EOF
     pacstrap /mnt btrfs-progs
+    mount ${part_boot} /mnt${efi_dir} --mkdir
     arch-chroot /mnt mkinitcpio -p linux
     device_uuid=$(blkid | grep ${part_root} | grep -oP ' UUID="\K[\w\d-]+')
     echo "GRUB_ENABLE_CRYPTODISK=y" >> /mnt/etc/default/grub
     perl -pi -e "s~GRUB_CMDLINE_LINUX_DEFAULT=\"loglevel=3 quiet\K~ cryptdevice=UUID=${device_uuid}:luks root=${luks_part}~" /mnt/etc/default/grub
 else
     efi_dir="${efi_dir}/efi"
+    mount ${part_boot} /mnt${efi_dir} --mkdir
 fi
 
 arch-chroot /mnt grub-install --target=x86_64-efi --bootloader-id=Archer --efi-directory=${efi_dir}
