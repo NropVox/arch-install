@@ -34,7 +34,6 @@ fi
 if [[ ${isbtrfs} == "y" ]]; then
     mkfs.btrfs -L btrfs ${part_root_install}
     mount ${part_root_install} /mnt
-    mount ${part_boot} /mnt/boot --mkdir
 
     btrfs subvolume create /mnt/@
     btrfs subvolume create /mnt/@var
@@ -47,6 +46,7 @@ if [[ ${isbtrfs} == "y" ]]; then
     mount -o noatime,nodiratime,compress=zstd,subvol=@var ${part_root_install} /mnt/var
     mount -o noatime,nodiratime,compress=zstd,subvol=@home ${part_root_install} /mnt/home
     mount -o noatime,nodiratime,compress=zstd,subvol=@snapshots ${part_root_install} /mnt/.snapshots
+    mount ${part_boot} /mnt/boot --mkdir
 else
     mkfs.ext4 "${part_root}"
     mount ${part_root} /mnt
