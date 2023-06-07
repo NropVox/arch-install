@@ -4,6 +4,12 @@ set -e
 systemctl enable NetworkManager
 systemctl start NetworkManager
 
+## Setup WiFi
+read -p "Connect to wifi SSID: " ssid
+read -p "Wifi Password: " wifiPassword
+
+nmcli d wifi connect ${ssid} password ${wifiPassword}
+
 ## Get Info
 read -p "Set this up as a server (y/N): " isserver
 
@@ -30,17 +36,18 @@ mv $pacman_conf.tmp $pacman_conf
 
 ## Install yay
 yaypkg=/home/aj/.yay-pkg
-sudo -u aj git clone https://aur.archlinux.org/yay-git.git ${yaypkg} && cd ${yaypkg} && sudo -u aj makepkg -si
+sudo -u aj git clone https://aur.archlinux.org/yay-git.git ${yaypkg} && cd ${yaypkg} && sudo -u aj makepkg -si --noconfirm
 rm -rf ${yaypkg}
 
 packages=""
 ## Install Packages
-if [[ ${isserver} = "" || ${isserver} = "N" || ${isserver} = "n"  ]]; then
-packages="${packages} go nodejs npm pagekite"
+if [[ ${isserver} == "y"  ]]; then
+    packages="${packages} go nodejs npm pagekite"
 else
-packages="${packages} hyprland-git"
+    packages="${packages} hyprland-git"
 fi
 
+yay --noconfirm -S ${packages}
 
 ## Final Touches
 if [[ -b /dev/sdb1 ]]; then
