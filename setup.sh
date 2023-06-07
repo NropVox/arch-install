@@ -34,6 +34,7 @@ fi
 if [[ ${isbtrfs} == "y" ]]; then
     mkfs.btrfs -L btrfs ${part_root_install}
     mount ${part_root_install} /mnt
+    mount ${part_boot} /mnt/boot --mkdir
 
     btrfs subvolume create /mnt/@
     btrfs subvolume create /mnt/@var
@@ -49,6 +50,7 @@ if [[ ${isbtrfs} == "y" ]]; then
 else
     mkfs.ext4 "${part_root}"
     mount ${part_root} /mnt
+    mount ${part_boot} /mnt/boot/efi --mkdir
 fi
 
 
@@ -78,14 +80,13 @@ FILES=()
 HOOKS=(base udev autodetect keyboard keymap modconf block encrypt filesystems keyboard fsck)
 EOF
     pacstrap /mnt btrfs-progs
-    mount ${part_boot} /mnt${efi_dir} --mkdir
+    mount ${part_boot} /mnt${efi_dir}
     arch-chroot /mnt mkinitcpio -p linux
     device_uuid=$(blkid | grep ${part_root} | grep -oP ' UUID="\K[\w\d-]+')
     echo "GRUB_ENABLE_CRYPTODISK=y" >> /mnt/etc/default/grub
     perl -pi -e "s~GRUB_CMDLINE_LINUX_DEFAULT=\"loglevel=3 quiet\K~ cryptdevice=UUID=${device_uuid}:luks root=${luks_part}~" /mnt/etc/default/grub
 else
     efi_dir="${efi_dir}/efi"
-    mount ${part_boot} /mnt${efi_dir} --mkdir
 fi
 
 arch-chroot /mnt grub-install --target=x86_64-efi --bootloader-id=Archer --efi-directory=${efi_dir}
