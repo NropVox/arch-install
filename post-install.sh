@@ -1,8 +1,8 @@
 set -e
 
 ## Setup NetworkManager
-arch-chroot /mnt systemctl enable NetworkManager
-arch-chroot /mnt systemctl start NetworkManager
+systemctl enable NetworkManager
+systemctl start NetworkManager
 
 ## Get Info
 read -p "Set this up as a server (y/N): " isserver
