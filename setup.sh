@@ -29,7 +29,7 @@ if [[ ${isencrypt} == "y" ]]; then
     echo -n ${password} | cryptsetup luksFormat --type luks2 --label luks "${part_root}"
     echo -n ${password} | cryptsetup luksOpen "${part_root}" luks
     part_root_install=/dev/mapper/luks
-else
+fi
 
 if [[ ${isbtrfs} == "y" ]]; then
     mkfs.btrfs -L btrfs ${part_root_install}
