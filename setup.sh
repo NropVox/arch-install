@@ -50,7 +50,7 @@ fi
 
 
 ## Install Arch
-pacstrap /mnt base linux linux-firmware git nano sudo grub efibootmgr networkmanager intel-ucode
+pacstrap /mnt base linux linux-firmware git nano sudo grub efibootmgr networkmanager intel-ucode base-devel
 
 ## Setup fstab
 genfstab -L /mnt >> /mnt/etc/fstab
