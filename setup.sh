@@ -2,11 +2,14 @@ set -e
 
 read -p "Enter disk name: " disk
 read -p "Use btrfs? (y/N): " isbtrfs
+read -p "Encrypt disk? (y/N): " isencrypt
 read -p "Enter username: " username
 read -s -p "Enter user password: " password
 echo 
+echo 
 read -s -p "Enter root password: " rootPassword
-echo
+
+clear
 
 ## Run reflector
 echo Running reflector
@@ -21,14 +24,20 @@ part_root=${device}1
 part_boot=${device}2
 mkfs.vfat -n "EFI" -F 32 "${part_boot}"
 
-if [[ ${isbtrfs} == "y" ]]; then
+part_root_install=${part_root}
+
+if [[ ${isencrypt} == "y" ]]; then
     echo -n ${password} | cryptsetup luksFormat --type luks2 --label luks "${part_root}"
     echo -n ${password} | cryptsetup luksOpen "${part_root}" luks
+    part_root_install=/dev/mapper/luks
+    mount ${part_boot} /mnt/boot --mkdir
+else
+    mount ${part_boot} /mnt/boot/efi --mkdir
+fi
 
-    luks_part=/dev/mapper/luks
-
-    mkfs.btrfs -L btrfs ${luks_part}
-    mount ${luks_part} /mnt
+if [[ ${isbtrfs} == "y" ]]; then
+    mkfs.btrfs -L btrfs ${part_root_install}
+    mount ${part_root_install} /mnt
 
     btrfs subvolume create /mnt/@
     btrfs subvolume create /mnt/@var
@@ -36,16 +45,14 @@ if [[ ${isbtrfs} == "y" ]]; then
     btrfs subvolume create /mnt/@snapshots
 
     umount /mnt
-    mount -o noatime,nodiratime,compress=zstd,subvol=@ ${luks_part} /mnt
+    mount -o noatime,nodiratime,compress=zstd,subvol=@ ${part_root_install} /mnt
     mkdir /mnt/{boot,var,home,.snapshots}
-    mount -o noatime,nodiratime,compress=zstd,subvol=@var ${luks_part} /mnt/var
-    mount -o noatime,nodiratime,compress=zstd,subvol=@home ${luks_part} /mnt/home
-    mount -o noatime,nodiratime,compress=zstd,subvol=@snapshots ${luks_part} /mnt/.snapshots
-    mount ${part_boot} /mnt/boot --mkdir
+    mount -o noatime,nodiratime,compress=zstd,subvol=@var ${part_root_install} /mnt/var
+    mount -o noatime,nodiratime,compress=zstd,subvol=@home ${part_root_install} /mnt/home
+    mount -o noatime,nodiratime,compress=zstd,subvol=@snapshots ${part_root_install} /mnt/.snapshots
 else
     mkfs.ext4 "${part_root}"
     mount ${part_root} /mnt
-    mount ${part_boot} /mnt/boot/efi --mkdir
 fi
 
 
@@ -66,7 +73,7 @@ echo "aj ALL=(ALL) ALL" > /mnt/etc/sudoers.d/00_aj
 
 efi_dir="/boot"
 ## Setup grub
-if [[ ${isbtrfs} == "y" ]]; then
+if [[ ${isencrypt} == "y" ]]; then
 ## Setup initramfs
 cat << EOF > /mnt/etc/mkinitcpio.conf
 MODULES=()
@@ -79,6 +86,7 @@ EOF
     device_uuid=$(blkid | grep ${part_root} | grep -oP ' UUID="\K[\w\d-]+')
     echo "GRUB_ENABLE_CRYPTODISK=y" >> /mnt/etc/default/grub
     perl -pi -e "s~GRUB_CMDLINE_LINUX_DEFAULT=\"loglevel=3 quiet\K~ cryptdevice=UUID=${device_uuid}:luks root=${luks_part}~" /mnt/etc/default/grub
+else
     efi_dir="${efi_dir}/efi"
 fi
 
