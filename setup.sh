@@ -76,12 +76,12 @@ EOF
     arch-chroot /mnt mkinitcpio -p linux
     device_uuid=$(blkid | grep ${part_root} | grep -oP ' UUID="\K[\w\d-]+')
     echo "GRUB_ENABLE_CRYPTODISK=y" >> /mnt/etc/default/grub
-    perl -pi -e "s/GRUB_TIMEOUT=\K\d+/0/" /mnt/etc/default/grub
-    perl -pi -e "s/GRUB_CMDLINE_LINUX_DEFAULT=\"loglevel=3 quiet\K/cryptdevice=${device_uuid}:luks root=${luks_part}/" /mnt/etc/default/grub
+    perl -pi -e "s/GRUB_CMDLINE_LINUX_DEFAULT=\"loglevel=3 quiet \K/cryptdevice=${device_uuid}:luks root=${luks_part}/" /mnt/etc/default/grub
 else
     arch-chroot /mnt grub-install --target=x86_64-efi --bootloader-id=Archer --efi-directory=/boot/efi
 fi
 
+perl -pi -e "s/GRUB_TIMEOUT=\K\d+/0/" /mnt/etc/default/grub
 arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg
 ## Setup NetworkManager
 arch-chroot /mnt systemctl enable NetworkManager
