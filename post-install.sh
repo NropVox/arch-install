@@ -1,8 +1,7 @@
 set -e
 
 ## Setup NetworkManager
-systemctl enable NetworkManager
-systemctl start NetworkManager
+systemctl enable --now NetworkManager
 
 ## Setup WiFi
 read -p "Connect to wifi SSID: " ssid
