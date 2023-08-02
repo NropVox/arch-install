@@ -1,5 +1,7 @@
 set -e
 
+username=$(whoami)
+
 ## Setup NetworkManager
 systemctl enable --now NetworkManager
 
