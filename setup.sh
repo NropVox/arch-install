@@ -4,15 +4,43 @@ read -p "Enter disk name: " disk
 read -p "Use btrfs? (y/N): " isbtrfs
 read -p "Encrypt disk? (y/N): " isencrypt
 read -p "Enter username: " username
-read -s -p "Enter user password: " password
-echo 
-read -s -p "Enter root password: " rootPassword
+
+while : ; do
+    read -s -p "Enter user password: " password
+    echo
+    read -s -p "Enter user password again: " password2
+    echo 
+    [[ $password != $password2 ]] || break
+    echo "error try again"
+done
+
+while : ; do
+    echo 
+    read -s -p "Enter root password: " rootPassword
+    echo
+    read -s -p "Enter root password: " rootPassword2
+    echo
+    [[ $rootPassword != $rootPassword2 ]] || break
+    echo "error try again"
+done
 
 clear
 
-## Run reflector
-echo Running reflector
-reflector --latest 20 --sort rate -c JP,SG,KR --save /etc/pacman.d/mirrorlist
+## Setup pacman config
+pacman_conf=/etc/pacman.conf
+sed 's/#ParallelDownloads/ParallelDownloads/' $pacman_conf > $pacman_conf.tmp
+mv $pacman_conf $pacman_conf.bak
+mv $pacman_conf.tmp $pacman_conf
+sed 's/#Color/Color/' $pacman_conf > $pacman_conf.tmp
+mv $pacman_conf $pacman_conf.bak
+mv $pacman_conf.tmp $pacman_conf
+
+## Configure Mirrors
+echo 'Server = https://geo.mirror.pkgbuild.com/$repo/os/$arch' > /etc/pacman.d/mirrorlist
+echo 'Server = https://mirror.osbeck.com/archlinux/$repo/os/$arch' >> /etc/pacman.d/mirrorlist
+echo 'Server = http://arch.mirror.constant.com/$repo/os/$arch' >> /etc/pacman.d/mirrorlist
+echo 'Server = http://arch.hu.fo/archlinux/$repo/os/$arch' >> /etc/pacman.d/mirrorlist
+echo 'Server = https://mirror.osbeck.com/archlinux/$repo/os/$arch' >> /etc/pacman.d/mirrorlist
 
 ## Setup disk
 device=/dev/${disk}
@@ -64,6 +92,7 @@ genfstab -L /mnt >> /mnt/etc/fstab
 
 ## Copy post install to new root
 cp post-install.sh /mnt/opt
+cp /etc/pacman.conf /mnt/etc/pacman.conf -f
 
 ## Setup users and password
 useradd -m -R /mnt ${username}
@@ -95,4 +124,4 @@ arch-chroot /mnt grub-install --target=x86_64-efi --bootloader-id=Archer --efi-d
 perl -pi -e "s/GRUB_TIMEOUT=\K\d+/0/" /mnt/etc/default/grub
 arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg
 
-echo Install Complete make sure to run the /opt/post-install.sh on first boot
+echo Install Complete make sure to run the /opt/post-install.sh as root on first boot
