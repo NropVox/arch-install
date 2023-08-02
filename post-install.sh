@@ -26,8 +26,8 @@ hwclock --systohc
 echo "archer" > /etc/hostname
 
 ## Install yay
-yaypkg=/home/aj/.yay-pkg
-sudo -u aj git clone https://aur.archlinux.org/yay-git.git ${yaypkg} && cd ${yaypkg} && sudo -u aj makepkg -si --noconfirm
+yaypkg=/home/${username}/.yay-pkg
+sudo -u ${username} git clone https://aur.archlinux.org/yay-git.git ${yaypkg} && cd ${yaypkg} && sudo -u ${username} makepkg -si --noconfirm
 rm -rf ${yaypkg}
 
 packages=""
@@ -43,16 +43,16 @@ pacman --noconfirm -S ${packages}
 
 ## Final Touches
 if [[ -b /dev/sdb1 ]]; then
-    mkdir -p /mnt/aj
-    chown aj:aj /mnt/aj
+    mkdir -p /mnt/${username}
+    chown ${username}:${username} /mnt/${username}
     echo "
     # /dev/sdb1
-    /dev/sdb1 /mnt/aj ext4 defaults 0 2
+    /dev/sdb1 /mnt/${username} ext4 defaults 0 2
     " >> /etc/fstab
     systemctl daemon-reload
     mount -a
 
-    sudo -u aj ln -s /mnt/aj/{Android-OS,Documents,Downloads,Pictures,Videos,Projects} /home/aj
+    sudo -u ${username} ln -s /mnt/${username}/{Android-OS,Documents,Downloads,Pictures,Videos,Projects} /home/${username}
 fi
 
 ## Remove itself
