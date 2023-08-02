@@ -28,7 +28,9 @@ echo "archer" > /etc/hostname
 
 ## Install yay
 yaypkg=/home/${username}/.yay-pkg
-sudo -u ${username} git clone https://aur.archlinux.org/yay-git.git ${yaypkg} && cd ${yaypkg} && sudo -u ${username} makepkg -si --noconfirm
+sudo -u ${username} git clone https://aur.archlinux.org/yay-git.git ${yaypkg}
+cd ${yaypkg}
+sudo -u ${username} makepkg -si --noconfirm
 rm -rf ${yaypkg}
 
 packages=""
