@@ -36,8 +36,8 @@ mv $pacman_conf $pacman_conf.bak
 mv $pacman_conf.tmp $pacman_conf
 
 ## Configure Mirrors
-echo 'Server = https://geo.mirror.pkgbuild.com/$repo/os/$arch' > /etc/pacman.d/mirrorlist
-echo 'Server = https://mirror.osbeck.com/archlinux/$repo/os/$arch' >> /etc/pacman.d/mirrorlist
+echo 'Server = https://mirror.osbeck.com/archlinux/$repo/os/$arch' > /etc/pacman.d/mirrorlist
+echo 'Server = https://geo.mirror.pkgbuild.com/$repo/os/$arch' >> /etc/pacman.d/mirrorlist
 echo 'Server = http://arch.mirror.constant.com/$repo/os/$arch' >> /etc/pacman.d/mirrorlist
 echo 'Server = http://arch.hu.fo/archlinux/$repo/os/$arch' >> /etc/pacman.d/mirrorlist
 echo 'Server = https://mirror.osbeck.com/archlinux/$repo/os/$arch' >> /etc/pacman.d/mirrorlist
@@ -98,7 +98,7 @@ cp /etc/pacman.conf /mnt/etc/pacman.conf -f
 useradd -m -R /mnt ${username}
 echo -n "${username}:${password}" | chpasswd -R /mnt
 echo -n "root:${rootPassword}" | chpasswd -R /mnt
-echo "aj ALL=(ALL) ALL" > /mnt/etc/sudoers.d/00_aj
+echo "${username} ALL=(ALL) ALL" > /mnt/etc/sudoers.d/00_${username}
 
 efi_dir="/boot"
 ## Setup grub
