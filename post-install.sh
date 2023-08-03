@@ -2,7 +2,9 @@ set -e
 
 username=$(whoami)
 
-usermod -c "Alvin Jay Deleverio" $username
+read -p "Full name: " fullname
+
+usermod -c $fullname $username
 
 ## Setup NetworkManager
 systemctl enable --now NetworkManager
@@ -41,7 +43,7 @@ if [[ ${isserver} == "y"  ]]; then
     packages="${packages} go nodejs npm pagekite"
 else
     packages="${packages} gdm gnome-shell gnome-terminal nautilus gnome-control-center gnome-system-monitor gvfs gvfs-mtp"
-    packages="$packages gvfs-smb xdg-desktop-portal-gnome xdg-user-dirs-gtk gnome-tweaks"
+    packages="$packages gvfs-smb xdg-desktop-portal-gnome xdg-user-dirs-gtk gnome-tweaks archlinux-wallpaper"
 fi
 
 pacman --noconfirm -S ${packages}
