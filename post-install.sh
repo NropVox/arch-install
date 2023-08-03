@@ -43,7 +43,7 @@ if [[ ${isserver} == "y"  ]]; then
     packages="${packages} go nodejs npm pagekite"
 else
     packages="${packages} gdm gnome-shell gnome-terminal nautilus gnome-control-center gnome-system-monitor gvfs gvfs-mtp"
-    packages="$packages gvfs-smb xdg-desktop-portal-gnome xdg-user-dirs-gtk gnome-tweaks archlinux-wallpaper"
+    packages="$packages gvfs-smb xdg-desktop-portal-gnome xdg-user-dirs-gtk gnome-tweaks archlinux-wallpaper chromium"
 fi
 
 pacman --noconfirm -S ${packages}
