@@ -2,6 +2,8 @@ set -e
 
 username=$(whoami)
 
+usermod -c "Alvin Jay Deleverio" $username
+
 ## Setup NetworkManager
 systemctl enable --now NetworkManager
 
