@@ -1,6 +1,6 @@
 set -e
 
-username=$(whoami)
+username=aj
 
 read -p "Full name: " fullname
 
